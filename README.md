@@ -21,4 +21,4 @@ See more clients [here](https://github.com/tldr-pages/tldr#clients)
 ![alt tag](https://raw.githubusercontent.com/TheAshwanik/tldr-Jquery-client/master/sample.jpg)
 
 ##Demo
-Available online at [blog.ashwani.co.in/tldr-Jquery-client](http://blog.ashwani.co.in/tldr-Jquery-client/)
+Available online at [blog.ashwani.co.in/tldr-Jquery-client](https://blog.ashwani.co.in/tldr-Jquery-client/)
