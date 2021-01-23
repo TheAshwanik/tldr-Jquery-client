@@ -1,302 +1,99 @@
-exitfromloop = false;
-var OS_LIST = [];
-var cmdList = [];
-var OS_ARRAY_WITH_DATA = {};
-CMD_PAGES_URL = "https://api.github.com/repos/tldr-pages/tldr/contents/pages/";
-CMD_PAGES_URL_BASE = "https://api.github.com/repos/tldr-pages/tldr/contents/pages/";
-CMD_PAGES_LANGUAGE = "https://api.github.com/repos/tldr-pages/tldr/contents/";
+exitfromloop = !1;
+var OS_LIST = [],
+    cmdList = [],
+    OS_ARRAY_WITH_DATA = {};
 
-function getCommands(ln = "en") {
-    OS_LIST.length = 0;
-    if (ln != "en") {
-        CMD_PAGES_URL = CMD_PAGES_URL_BASE.replace("/pages/", "/pages." + ln + "/");
-    } else {
-        CMD_PAGES_URL = CMD_PAGES_URL_BASE;
-    }
-    $("#osSection .jumbotron").remove();
-    $.ajax({
+function getCommands(e = "en") {
+    OS_LIST.length = 0, CMD_PAGES_URL = "en" != e ? CMD_PAGES_URL_BASE.replace("/pages/", "/pages." + e + "/") : CMD_PAGES_URL_BASE, $("#osSection .jumbotron").remove(), $.ajax({
         url: CMD_PAGES_URL,
-        success: function (data) {
-            jQuery.each(data, function (i, val) {
-                //console.log(OS_LIST[i].type);
-                if (val.type == "dir") {
-                    //console.log(val.name);
-                    OS_LIST.push(val);
+        success: function(e) {
+            for (jQuery.each(e, function(e, t) {
+                    "dir" == t.type && OS_LIST.push(t)
+                }), i = 0; i < OS_LIST.length; i++) os_name = OS_LIST[i].name, template = "<div class='jumbotron'> <p id='osname_" + i + "'></p> <p id='osnameTags_" + i + "'></p> </div>", $("#osSection").append(template), $("#osname_" + i).html(os_name), $.ajax({
+                url: CMD_PAGES_URL + os_name,
+                async: !1,
+                success: function(e) {
+                    tempHtml = "<div id='selector' class=''>", temparr = [], jQuery.each(e, function(e, t) {
+                        temparr.push(t.name), tempHtml = tempHtml + '<button type="button" class="btn active badge" id="' + t.name + '" onclick="javascript:SearchButtonClicked(\'' + t.name + "');\">" + t.name + "</button>"
+                    }), tempHtml += "</div>", OS_ARRAY_WITH_DATA[os_name] = temparr, $("#osnameTags_" + i).html(tempHtml), tempHtml = ""
                 }
-                //alert(data[i].name);
-            });
-
-            //console.log(OS_LIST);
-
-            for (i = 0; i < OS_LIST.length; i++) {
-                os_name = OS_LIST[i].name;
-                template = "<div class='jumbotron'> <p id='osname_" + i + "'></p> <p id='osnameTags_" + i + "'></p> </div>";
-                $("#osSection").append(template);
-                $("#osname_" + i).html(os_name);
-                //console.log(os_name);
-                $.ajax({
-                    url: CMD_PAGES_URL + os_name,
-                    async: false,
-                    success: function (data) {
-                        tempHtml = "<div id='selector' class=''>";
-                        temparr = [];
-                        jQuery.each(data, function (j, val) {
-                            temparr.push(val.name);
-                            tempHtml = tempHtml + '<button type="button" class="btn active badge" id="' + val.name + '" onclick="javascript:SearchButtonClicked(\'' + val.name + "');\">" + val.name + "</button>";
-                        });
-
-                        tempHtml = tempHtml + "</div>";
-
-                        //$.sessionStorage(os_name, JSON.stringify(temparr));
-                        OS_ARRAY_WITH_DATA[os_name] = temparr;
-                        $("#osnameTags_" + i).html(tempHtml);
-                        tempHtml = "";
-                        //alert(os_name + "----" + temparr);
-                        //cmdList.splice(0, cmdList.length);
-                    },
-                });
-            }
+            })
         },
-        error: function (data) {
-            if (data.message) {
-                console.log(data.message);
-            }
-
-            // ajax error callback
-        },
-    }); // The function returns the product of p1 and p2
+        error: function(e) {
+            e.message && console.log(e.message)
+        }
+    })
 }
-
-$(document).ready(function () {
+CMD_PAGES_URL = "https://api.github.com/repos/tldr-pages/tldr/contents/pages/", CMD_PAGES_URL_BASE = "https://api.github.com/repos/tldr-pages/tldr/contents/pages/", CMD_PAGES_LANGUAGE = "https://api.github.com/repos/tldr-pages/tldr/contents/", $(document).ready(function() {
     getCommands("en");
-    var languageSelect = document.getElementById("language");
-    var languageOption = document.createElement("option");
-    languageOption.text = "en";
-    languageSelect.add(languageOption);
-    $.ajax({
+    var e = document.getElementById("language"),
+        t = document.createElement("option");
+    t.text = "en", e.add(t), $.ajax({
         url: CMD_PAGES_LANGUAGE,
-        success: function (data) {
-            jQuery.each(data, function (i, val) {
-                //console.log(OS_LIST[i].type);
-                if (val.type == "dir") {
-                    if (val.name.split("pages.")[1]) {
-                        var languageSelect = document.getElementById("language");
-                        var languageOption = document.createElement("option");
-                        languageOption.text = val.name.split("pages.")[1];
-                        languageSelect.add(languageOption);
-                    }
+        success: function(e) {
+            jQuery.each(e, function(e, t) {
+                if ("dir" == t.type && t.name.split("pages.")[1]) {
+                    var o = document.getElementById("language"),
+                        a = document.createElement("option");
+                    a.text = t.name.split("pages.")[1], o.add(a)
                 }
-                //alert(data[i].name);
-            });
-
-            //console.log(OS_LIST);
+            })
         },
-        error: function (data) {
-            if (data.message) {
-                console.log(data.message);
-            }
-
-            // ajax error callback
-        },
-    });
-
-    SearchButtonClicked = function (cmdName) {
-        //alert(cmdName);
-        $("#searchBox").val(cmdName.substring(0, cmdName.lastIndexOf(".")));
-        $("#searchButton").click();
-    };
-
-    Check = function (arr, str) {
-        var i, j;
-        var totalmatches = 0;
-        for (i = 0; i < arr.length; i++) {
-            if (arr[i] == str) {
-                totalmatches++;
-            }
+        error: function(e) {
+            e.message && console.log(e.message)
         }
-        if (totalmatches > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-});
-
-$("#language").on("change", function (e) {
-    var languageSelect = document.getElementById("language");
-    getCommands(languageSelect.value);
-});
-
-$("#searchButton").on("click", function (e) {
-    $("#cmdDetails").html("");
-
-    BASE_TLDR_API_URL = "https://api.github.com/repos/tldr-pages/tldr/contents/pages";
-    var languageSelect = document.getElementById("language");
-
-    e.preventDefault(); // prevent the default click action
-    //alert("hi");
-    cmdToSearch = $("#searchBox").val();
-    //alert(cmdName);
-    //console.log(OS_LIST);
-
-    // $.each(OS_ARRAY_WITH_DATA, function (index, value) {
-    //     alert( index + ' : ' + value );
-    // });
-
-    for (i = 0; i < OS_LIST.length; i++) {
-        if (Check(OS_ARRAY_WITH_DATA[OS_LIST[i].name], cmdToSearch + ".md")) {
-            //console.log(exitfromloop);
-            url = OS_LIST[i].url;
-            os_name = OS_LIST[i].name;
-            if (languageSelect.value != "en") {
-                url = url.replace("/pages/", "/pages." + languageSelect.value + "/");
-            }
-            $.ajax({
-                url: url.split("?")[0] + "/" + cmdToSearch + ".md",
-                success: function (data) {
-                    //alert('response received');
-                    console.log(Base64.decode(data.content));
-                    $("#cmdDetails").html(markdown.toHTML(Base64.decode(data.content)));
-                    exitfromloop = true;
-                    $("body").animate({ scrollTop: 0 }, "slow");
-                    // ajax success callback
-                },
-                error: function (data) {
-                    console.log("Command not found in -->" + os_name);
-                    $("#cmdDetails").html(data.message);
-                    $("body").animate({ scrollTop: 0 }, "slow");
-                    // ajax error callback
-                },
-            });
-        } else {
-            $("#cmdDetails").html("Command help not found... Please select from the tags below.");
-            $("body").animate({ scrollTop: 0 }, "slow");
-        }
+    }), SearchButtonClicked = function(e) {
+        $("#searchBox").val(e.substring(0, e.lastIndexOf("."))), $("#searchButton").click()
+    }, Check = function(e, t) {
+        var o, a = 0;
+        for (o = 0; o < e.length; o++) e[o] == t && a++;
+        return a > 0
     }
+}), $("#language").on("change", function(e) {
+    getCommands(document.getElementById("language").value)
+}), $("#searchButton").on("click", function(e) {
+    $("#cmdDetails").html(""), BASE_TLDR_API_URL = "https://api.github.com/repos/tldr-pages/tldr/contents/pages";
+    var t = document.getElementById("language");
+    for (e.preventDefault(), cmdToSearch = $("#searchBox").val(), i = 0; i < OS_LIST.length; i++) Check(OS_ARRAY_WITH_DATA[OS_LIST[i].name], cmdToSearch + ".md") ? (url = OS_LIST[i].url, os_name = OS_LIST[i].name, "en" != t.value && (url = url.replace("/pages/", "/pages." + t.value + "/")), $.ajax({
+        url: url.split("?")[0] + "/" + cmdToSearch + ".md",
+        success: function(e) {
+            console.log(Base64.decode(e.content)), $("#cmdDetails").html(markdown.toHTML(Base64.decode(e.content))), exitfromloop = !0, $("body").animate({
+                scrollTop: 0
+            }, "slow")
+        },
+        error: function(e) {
+            console.log("Command not found in --\x3e" + os_name), $("#cmdDetails").html(e.message), $("body").animate({
+                scrollTop: 0
+            }, "slow")
+        }
+    })) : ($("#cmdDetails").html("Command help not found... Please select from the tags below."), $("body").animate({
+        scrollTop: 0
+    }, "slow"))
 });
-
-/**
- *
- *  Base64 encode / decode
- *  http://www.webtoolkit.info/
- *
- **/
-
 var Base64 = {
-    // private property
     _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-
-    // public method for encoding
-    encode: function (input) {
-        var output = "";
-        var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-        var i = 0;
-
-        input = Base64._utf8_encode(input);
-
-        while (i < input.length) {
-            chr1 = input.charCodeAt(i++);
-            chr2 = input.charCodeAt(i++);
-            chr3 = input.charCodeAt(i++);
-
-            enc1 = chr1 >> 2;
-            enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-            enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-            enc4 = chr3 & 63;
-
-            if (isNaN(chr2)) {
-                enc3 = enc4 = 64;
-            } else if (isNaN(chr3)) {
-                enc4 = 64;
-            }
-
-            output = output + this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) + this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
-        }
-
-        return output;
+    encode: function(e) {
+        var t, o, a, n, r, c, s, m = "",
+            i = 0;
+        for (e = Base64._utf8_encode(e); i < e.length;) n = (t = e.charCodeAt(i++)) >> 2, r = (3 & t) << 4 | (o = e.charCodeAt(i++)) >> 4, c = (15 & o) << 2 | (a = e.charCodeAt(i++)) >> 6, s = 63 & a, isNaN(o) ? c = s = 64 : isNaN(a) && (s = 64), m = m + this._keyStr.charAt(n) + this._keyStr.charAt(r) + this._keyStr.charAt(c) + this._keyStr.charAt(s);
+        return m
     },
-
-    // public method for decoding
-    decode: function (input) {
-        var output = "";
-        var chr1, chr2, chr3;
-        var enc1, enc2, enc3, enc4;
-        var i = 0;
-
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-        while (i < input.length) {
-            enc1 = this._keyStr.indexOf(input.charAt(i++));
-            enc2 = this._keyStr.indexOf(input.charAt(i++));
-            enc3 = this._keyStr.indexOf(input.charAt(i++));
-            enc4 = this._keyStr.indexOf(input.charAt(i++));
-
-            chr1 = (enc1 << 2) | (enc2 >> 4);
-            chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-            chr3 = ((enc3 & 3) << 6) | enc4;
-
-            output = output + String.fromCharCode(chr1);
-
-            if (enc3 != 64) {
-                output = output + String.fromCharCode(chr2);
-            }
-            if (enc4 != 64) {
-                output = output + String.fromCharCode(chr3);
-            }
-        }
-
-        output = Base64._utf8_decode(output);
-
-        return output;
+    decode: function(e) {
+        var t, o, a, n, r, c, s = "",
+            m = 0;
+        for (e = e.replace(/[^A-Za-z0-9\+\/\=]/g, ""); m < e.length;) t = this._keyStr.indexOf(e.charAt(m++)) << 2 | (n = this._keyStr.indexOf(e.charAt(m++))) >> 4, o = (15 & n) << 4 | (r = this._keyStr.indexOf(e.charAt(m++))) >> 2, a = (3 & r) << 6 | (c = this._keyStr.indexOf(e.charAt(m++))), s += String.fromCharCode(t), 64 != r && (s += String.fromCharCode(o)), 64 != c && (s += String.fromCharCode(a));
+        return s = Base64._utf8_decode(s)
     },
-
-    // private method for UTF-8 encoding
-    _utf8_encode: function (string) {
-        string = string.replace(/\r\n/g, "\n");
-        var utftext = "";
-
-        for (var n = 0; n < string.length; n++) {
-            var c = string.charCodeAt(n);
-
-            if (c < 128) {
-                utftext += String.fromCharCode(c);
-            } else if (c > 127 && c < 2048) {
-                utftext += String.fromCharCode((c >> 6) | 192);
-                utftext += String.fromCharCode((c & 63) | 128);
-            } else {
-                utftext += String.fromCharCode((c >> 12) | 224);
-                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-                utftext += String.fromCharCode((c & 63) | 128);
-            }
+    _utf8_encode: function(e) {
+        e = e.replace(/\r\n/g, "\n");
+        for (var t = "", o = 0; o < e.length; o++) {
+            var a = e.charCodeAt(o);
+            a < 128 ? t += String.fromCharCode(a) : a > 127 && a < 2048 ? (t += String.fromCharCode(a >> 6 | 192), t += String.fromCharCode(63 & a | 128)) : (t += String.fromCharCode(a >> 12 | 224), t += String.fromCharCode(a >> 6 & 63 | 128), t += String.fromCharCode(63 & a | 128))
         }
-
-        return utftext;
+        return t
     },
-
-    // private method for UTF-8 decoding
-    _utf8_decode: function (utftext) {
-        var string = "";
-        var i = 0;
-        var c = (c1 = c2 = 0);
-
-        while (i < utftext.length) {
-            c = utftext.charCodeAt(i);
-
-            if (c < 128) {
-                string += String.fromCharCode(c);
-                i++;
-            } else if (c > 191 && c < 224) {
-                c2 = utftext.charCodeAt(i + 1);
-                string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-                i += 2;
-            } else {
-                c2 = utftext.charCodeAt(i + 1);
-                c3 = utftext.charCodeAt(i + 2);
-                string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-                i += 3;
-            }
-        }
-
-        return string;
-    },
+    _utf8_decode: function(e) {
+        for (var t = "", o = 0, a = c1 = c2 = 0; o < e.length;)(a = e.charCodeAt(o)) < 128 ? (t += String.fromCharCode(a), o++) : a > 191 && a < 224 ? (c2 = e.charCodeAt(o + 1), t += String.fromCharCode((31 & a) << 6 | 63 & c2), o += 2) : (c2 = e.charCodeAt(o + 1), c3 = e.charCodeAt(o + 2), t += String.fromCharCode((15 & a) << 12 | (63 & c2) << 6 | 63 & c3), o += 3);
+        return t
+    }
 };
